@@ -55,6 +55,7 @@
      <Compile Include="Assets\Scripts\CameraMovement.cs" />
      <Compile Include="Assets\Scripts\CatmullRomCurveInterpolation.cs" />
      <Compile Include="Assets\Scripts\CreateObject.cs" />
+     <Compile Include="Assets\Scripts\FluidSimulationGrid.cs" />
      <Compile Include="Assets\Scripts\GenerateMesh.cs" />
      <Compile Include="Assets\Scripts\GenerateMeshEditor.cs" />
      <Compile Include="Assets\Scripts\Grabber.cs" />
@@ -67,6 +68,8 @@
      <Compile Include="Assets\Scripts\RotateScript.cs" />
      <Compile Include="Assets\Scripts\SpringParticle.cs" />
      <Compile Include="Assets\Scripts\WallScript.cs" />
+     <Compile Include="Assets\Scripts\WaterParticleScript.cs" />
+     <Compile Include="Assets\Scripts\WaterSourceScript.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
