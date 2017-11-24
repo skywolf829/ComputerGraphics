@@ -6,9 +6,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.20506</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
     <ProjectGuid>{C1A87F33-C749-790C-55F8-F8A571918709}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -39,76 +38,93 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.XML" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="UnityEngine">
-      <HintPath>/Applications/Unity/Unity.app/Contents/Managed/UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor">
-      <HintPath>/Applications/Unity/Unity.app/Contents/Managed/UnityEditor.dll</HintPath>
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\Managed\UnityEditor.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\AnimateCubeScript.cs" />
-     <Compile Include="Assets\Scripts\CameraMovement.cs" />
-     <Compile Include="Assets\Scripts\CatmullRomCurveInterpolation.cs" />
-     <Compile Include="Assets\Scripts\CreateObject.cs" />
-     <Compile Include="Assets\Scripts\FluidSimulationGrid.cs" />
-     <Compile Include="Assets\Scripts\GenerateMesh.cs" />
-     <Compile Include="Assets\Scripts\GenerateMeshEditor.cs" />
-     <Compile Include="Assets\Scripts\Grabber.cs" />
-     <Compile Include="Assets\Scripts\InputController.cs" />
-     <Compile Include="Assets\Scripts\MovementScript.cs" />
-     <Compile Include="Assets\Scripts\Particle.cs" />
-     <Compile Include="Assets\Scripts\ParticleEmitter.cs" />
-     <Compile Include="Assets\Scripts\PredatorScript.cs" />
-     <Compile Include="Assets\Scripts\PreyScript.cs" />
-     <Compile Include="Assets\Scripts\RotateScript.cs" />
-     <Compile Include="Assets\Scripts\SpringParticle.cs" />
-     <Compile Include="Assets\Scripts\WallScript.cs" />
-     <Compile Include="Assets\Scripts\WaterParticleScript.cs" />
-     <Compile Include="Assets\Scripts\WaterSourceScript.cs" />
- <Reference Include="UnityEngine.UI">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Networking">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.TestRunner">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/TestRunner/UnityEngine.TestRunner.dll</HintPath>
- </Reference>
- <Reference Include="nunit.framework">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/TestRunner/net35/unity-custom/nunit.framework.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Timeline">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Timeline/RuntimeEditor/UnityEngine.Timeline.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.UIAutomation">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UIAutomation/UnityEngine.UIAutomation.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.GoogleAudioSpatializer">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityGoogleAudioSpatializer/RuntimeEditor/UnityEngine.GoogleAudioSpatializer.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.HoloLens">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityHoloLens/RuntimeEditor/UnityEngine.HoloLens.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.SpatialTracking">
- <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
- </Reference>
- <Reference Include="Vuforia.UnityExtensions">
- <HintPath>/Applications/Unity/PlaybackEngines/VuforiaSupport/Managed/Runtime/Vuforia.UnityExtensions.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Advertisements">
- <HintPath>/Users/Skylar/Library/Unity/cache/packages/packages.unity.com/com.unity.ads@1.0.1/UnityEngine.Advertisements.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Analytics">
- <HintPath>/Users/Skylar/Library/Unity/cache/packages/packages.unity.com/com.unity.analytics@1.0.1/UnityEngine.Analytics.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Purchasing">
- <HintPath>/Users/Skylar/Library/Unity/cache/packages/packages.unity.com/com.unity.purchasing@1.0.1/UnityEngine.Purchasing.dll</HintPath>
- </Reference>
+    <Compile Include="Assets\net-core\src\alglib_info.cs" />
+    <Compile Include="Assets\net-core\src\alglibinternal.cs" />
+    <Compile Include="Assets\net-core\src\alglibmisc.cs" />
+    <Compile Include="Assets\net-core\src\ap.cs" />
+    <Compile Include="Assets\net-core\src\dataanalysis.cs" />
+    <Compile Include="Assets\net-core\src\diffequations.cs" />
+    <Compile Include="Assets\net-core\src\fasttransforms.cs" />
+    <Compile Include="Assets\net-core\src\integration.cs" />
+    <Compile Include="Assets\net-core\src\interpolation.cs" />
+    <Compile Include="Assets\net-core\src\linalg.cs" />
+    <Compile Include="Assets\net-core\src\optimization.cs" />
+    <Compile Include="Assets\net-core\src\solvers.cs" />
+    <Compile Include="Assets\net-core\src\specialfunctions.cs" />
+    <Compile Include="Assets\net-core\src\statistics.cs" />
+    <Compile Include="Assets\Scripts\AnimateCubeScript.cs" />
+    <Compile Include="Assets\Scripts\CameraMovement.cs" />
+    <Compile Include="Assets\Scripts\CatmullRomCurveInterpolation.cs" />
+    <Compile Include="Assets\Scripts\CreateObject.cs" />
+    <Compile Include="Assets\Scripts\FluidSimulation.cs" />
+    <Compile Include="Assets\Scripts\GenerateMesh.cs" />
+    <Compile Include="Assets\Scripts\GenerateMeshEditor.cs" />
+    <Compile Include="Assets\Scripts\Grabber.cs" />
+    <Compile Include="Assets\Scripts\InputController.cs" />
+    <Compile Include="Assets\Scripts\MovementScript.cs" />
+    <Compile Include="Assets\Scripts\Particle.cs" />
+    <Compile Include="Assets\Scripts\ParticleEmitter.cs" />
+    <Compile Include="Assets\Scripts\PredatorScript.cs" />
+    <Compile Include="Assets\Scripts\PreyScript.cs" />
+    <Compile Include="Assets\Scripts\RotateScript.cs" />
+    <Compile Include="Assets\Scripts\SpringParticle.cs" />
+    <Compile Include="Assets\Scripts\WallScript.cs" />
+    <Compile Include="Assets\Scripts\WaterParticleScript.cs" />
+    <Compile Include="Assets\Scripts\WaterSourceScript.cs" />
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\GUISystem\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\Networking\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TestRunner">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\TestRunner\UnityEngine.TestRunner.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\TestRunner\net35\unity-custom\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Timeline">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\Timeline\RuntimeEditor\UnityEngine.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIAutomation">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\UIAutomation\UnityEngine.UIAutomation.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GoogleAudioSpatializer">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\UnityGoogleAudioSpatializer\RuntimeEditor\UnityEngine.GoogleAudioSpatializer.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.HoloLens">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\UnityHoloLens\RuntimeEditor\UnityEngine.HoloLens.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpatialTracking">
+      <HintPath>..\..\..\Applications\Unity\Unity.app\Contents\UnityExtensions\Unity\UnitySpatialTracking\RuntimeEditor\UnityEngine.SpatialTracking.dll</HintPath>
+    </Reference>
+    <Reference Include="Vuforia.UnityExtensions">
+      <HintPath>..\..\..\Applications\Unity\PlaybackEngines\VuforiaSupport\Managed\Runtime\Vuforia.UnityExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="alglibnet2">
+      <HintPath>Assets\net-core\alglibnet2.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Advertisements">
+      <HintPath>..\Library\Unity\cache\packages\packages.unity.com\com.unity.ads%401.0.1\UnityEngine.Advertisements.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Analytics">
+      <HintPath>..\Library\Unity\cache\packages\packages.unity.com\com.unity.analytics%401.0.1\UnityEngine.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Purchasing">
+      <HintPath>..\Library\Unity\cache\packages\packages.unity.com\com.unity.purchasing%401.0.1\UnityEngine.Purchasing.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -118,5 +134,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  
 </Project>

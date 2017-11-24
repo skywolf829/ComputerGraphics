@@ -136,6 +136,9 @@
  <Reference Include="UnityEditor.OSXStandalone.Extensions">
  <HintPath>/Applications/Unity/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
  </Reference>
+ <Reference Include="alglibnet2">
+ <HintPath>/Users/Skylar/ComputerGraphics/Assets/net-core/alglibnet2.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>/Users/Skylar/Library/Unity/cache/packages/packages.unity.com/com.unity.ads@1.0.1/UnityEngine.Advertisements.dll</HintPath>
  </Reference>
