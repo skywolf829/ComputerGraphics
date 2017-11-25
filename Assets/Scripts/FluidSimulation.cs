@@ -22,9 +22,9 @@ public class FluidSimulation : MonoBehaviour {
 
 	class Grid{
         
-		const float CFL_CONSTANT = 3;
-		const float MIN_TIMESTEP = 0.008333f;
-		const float MAX_TIMESTEP = 0.05f;
+		const float CFL_CONSTANT = 2;
+		const float MIN_TIMESTEP = 0.00001f;
+		const float MAX_TIMESTEP = 1f;
 
 		private float cellSize;
 		private Vector3 volume;
@@ -88,11 +88,60 @@ public class FluidSimulation : MonoBehaviour {
                     result.z = c.velocity.z - behind.velocity.z;
                     //Debug.Log("Behind velocity is " + behind.velocity);
                 }
+                //Debug.Log("End velocity gradient of " + c.index + ": " + result);
             }
-            //Debug.Log("End velocity gradient of " + c.index + ": " + result);
 			return result;
 		}
+        Vector3 ModifiedVelocityGadientAt(Vector3 pos){
+            Vector3 result = Vector3.zero;
+            Cell c = GetCellAt(pos);
+            if (c != null)
+            {
+                Vector3 cVel = c.velocity;
+                Cell right = GetCellAt(pos + new Vector3(cellSize, 0, 0));
+                Cell left = GetCellAt(pos - new Vector3(cellSize, 0, 0));
+                Cell above = GetCellAt(pos + new Vector3(0, cellSize, 0));
+                Cell below = GetCellAt(pos - new Vector3(0, cellSize, 0));
+                Cell forward = GetCellAt(pos + new Vector3(0, 0, cellSize));
+                Cell behind = GetCellAt(pos - new Vector3(0, 0, cellSize));
 
+
+                if (left != null && left.type == "solid"){
+                    cVel.x = 0;
+                }
+                if (below != null && below.type == "solid"){
+                    cVel.y = 0;
+                }
+                if(behind != null && behind.type == "solid"){
+                    cVel.z = 0;
+                }
+
+                //Debug.Log("Cell: " + c.index + " velocity is " + result);
+                if (right != null)
+                {
+                    result.x = -cVel.x + right.velocity.x;
+                    //Debug.Log("Aside velocity is " + aside.velocity);
+                }
+
+                if (above != null)
+                {
+                    result.y = -cVel.y + above.velocity.y;
+                    //Debug.Log("Below velocity is " + below.velocity);
+                }
+
+                if (forward != null)
+                {
+                    result.z = -cVel.z + forward.velocity.z;
+                    //Debug.Log("Behind velocity is " + behind.velocity);
+                }
+                //Debug.Log("End velocity gradient of " + c.index + ": " + result);
+            }
+            return result;
+        }
+        float ModifiedDivergenceAt(Vector3 pos){
+            Vector3 result = ModifiedVelocityGadientAt(pos);
+            return result.x + result.y + result.z;
+        }
 		float DivergenceAt(Vector3 pos){
 			Vector3 result = VelocityGradientAt (pos);
 			return result.x + result.y + result.z;
@@ -191,7 +240,7 @@ public class FluidSimulation : MonoBehaviour {
 					result.z += forward.z;
 					num++;
 				}
-				result += num * gradient;
+				result -= num * gradient;
 			}
 			return result;
 		}
@@ -379,8 +428,14 @@ public class FluidSimulation : MonoBehaviour {
             if (cells.Count == 0) return;
 			int numFluidCells = 0;
 
+            foreach (DictionaryEntry entry in cells)
+            {
+                Cell c = (Cell)entry.Value;
+                if (c.type == "fluid") numFluidCells++;
+            }
             // Convection via backwards particle trace
             //Debug.Log("Convection");
+
 			foreach (DictionaryEntry entry in cells) {
 				Cell c = (Cell)entry.Value;		
 				Cell traceCell = TraceParticle (ToVector3 (c.index) * cellSize, -timestep);
@@ -389,9 +444,7 @@ public class FluidSimulation : MonoBehaviour {
 				} else {
 					c.tempVelocity = Vector3.zero;
 				}
-				if (c.type == "fluid") {
-					numFluidCells++;
-				}
+
 			}
 			ApplyTempVelocities ();
 
@@ -413,6 +466,7 @@ public class FluidSimulation : MonoBehaviour {
 
             // Viscosity
             //Debug.Log("Viscosity");
+
 			foreach (DictionaryEntry entry in cells) {
 				Cell c = ((Cell)entry.Value);
                 Vector3 l = VelocityLaplacianAt (ToVector3(c.index) * cellSize);
@@ -532,9 +586,9 @@ public class FluidSimulation : MonoBehaviour {
 					}
 
 					b [row] = ((density * cellSize) / timestep) *
-					    DivergenceAt (ToVector3 (c.index) * cellSize) -
+                        ModifiedDivergenceAt (ToVector3 (c.index) * cellSize) -
 					    numAirCells * atmPressure;
-                    //Debug.Log(b[row]);
+                    //Debug.Log(DivergenceAt(ToVector3(c.index) * cellSize));
 				}
 			}
 			//Debug.Log (cellToRow.Count + " " + numFluidCells);
@@ -558,35 +612,38 @@ public class FluidSimulation : MonoBehaviour {
 
             // Apply pressure
             //Debug.Log("Applying pressure");
+
 			foreach (DictionaryEntry e in cells) {
 				Cell c = (Cell)e.Value;
-				if (c.type == "fluid")
-					c.velocity -= timestep / (density * cellSize) *
-						PressureGradientAt (ToVector3 (c.index) * cellSize);
-                else{
-                    Cell above = GetCellAt(ToVector3(c.index) * cellSize +
+                if (c.type == "fluid" || c.type == "air"){
+				
+                    Cell below = GetCellAt(ToVector3(c.index) * cellSize -
                                            new Vector3(0, cellSize, 0));
-                    Cell right = GetCellAt(ToVector3(c.index) * cellSize +
+                    Cell left = GetCellAt(ToVector3(c.index) * cellSize -
                                            new Vector3(cellSize, 0, 0));
-                    Cell forward = GetCellAt(ToVector3(c.index) * cellSize +
+                    Cell behind = GetCellAt(ToVector3(c.index) * cellSize -
                                            new Vector3(0, 0, cellSize));
-                    if (above != null && above.type == "fluid")
+                    if ((c.type == "air" && below != null && below.type == "fluid") ||
+                        (c.type == "fluid" && below != null && below.type != "solid"))
                     {
                         c.velocity.y -= timestep / (density * cellSize) *
                         PressureGradientAt(ToVector3(c.index) * cellSize).y;
                     }
-                    if (right != null && right.type == "fluid")
+                    if ((c.type == "air" && left != null && left.type == "fluid") ||
+                        (c.type == "fluid" && left != null && left.type != "solid"))
                     {
                         c.velocity.x -= timestep / (density * cellSize) *
                         PressureGradientAt(ToVector3(c.index) * cellSize).x;
                     }
-                    if (forward != null && forward.type == "fluid")
+                    if ((c.type == "air" && behind != null && behind.type == "fluid") ||
+                        (c.type == "fluid" && behind != null && behind.type != "solid"))
                     {
                         c.velocity.z -= timestep / (density * cellSize) *
                         PressureGradientAt(ToVector3(c.index) * cellSize).z;
                     }
 
                 }
+               
 			}
 
             // Extrapolate velocities into buffer
@@ -619,7 +676,7 @@ public class FluidSimulation : MonoBehaviour {
                             neighbors.Add(below);
                         }
                         if(above != null && above.layer == i-1){
-                            neighbors.Add(below);
+                            neighbors.Add(above);
                         }
                         if(behind != null && behind.layer == i-1){
                             neighbors.Add(behind);
@@ -636,22 +693,32 @@ public class FluidSimulation : MonoBehaviour {
                                 if (below == null || below.type != "fluid")
                                 {
                                     newVelocity.y += n.velocity.y;
-                                    numToDivide.y++;
+                                    numToDivide.y += 1;
                                 }
                                 if (left == null || left.type != "fluid")
                                 {
                                     newVelocity.x += n.velocity.x;
-                                    numToDivide.x++;
+                                    numToDivide.x += 1;
                                 }
                                 if (behind == null || behind.type != "fluid")
                                 {
                                     newVelocity.z += n.velocity.z;
-                                    numToDivide.z++;
+                                    numToDivide.z += 1;
                                 }
                             }
-                            c.velocity = new Vector3(newVelocity.x / numToDivide.x,
-                                                     newVelocity.y / numToDivide.y,
-                                                     newVelocity.z / numToDivide.z);
+                            //Debug.Log("Before: " + c.velocity);
+                            if (numToDivide.x > 0.01f){
+                                c.velocity.x = newVelocity.x / numToDivide.x;
+                            }
+                            if (numToDivide.y > 0.01f)
+                            {
+                                c.velocity.y = newVelocity.y / numToDivide.y;
+                            }
+                            if (numToDivide.z > 0.01f)
+                            {
+                                c.velocity.z = newVelocity.z / numToDivide.z;
+                            }
+                            //Debug.Log("After: " + c.velocity);
                             c.layer = i;
                         }
 					}
@@ -759,10 +826,12 @@ public class FluidSimulation : MonoBehaviour {
 	public float cellSize;
 	public Vector3 volume;
 	public Vector3 center;
-	public int numParticles;
+    //public int numParticles;
+    public Material blue;
 
 	public Vector3 sourcePoint;
 	public Vector3 sourceVelocity;
+
 
 	Grid g;
 	HashSet<GameObject> particles = new HashSet<GameObject>();
@@ -777,6 +846,7 @@ public class FluidSimulation : MonoBehaviour {
             GameObject p = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             p.transform.localScale = Vector3.one * cellSize / 2.0f;
             p.transform.position = sourcePoint;
+            p.GetComponent<MeshRenderer>().material = blue;
             particles.Add(p);
             g.SourceSpawn(sourcePoint, sourceVelocity);
         }
@@ -789,7 +859,7 @@ public class FluidSimulation : MonoBehaviour {
 			float timestep = g.GetTimeStep ();
 			//timestep = Time.fixedDeltaTime;
 			g.UpdateGrid (particles);
-			g.AdvanceVelocityField (timestep, -2f, 0.01f, 1.0f, 1.0f);
+			g.AdvanceVelocityField (timestep, -2f, 0.1f, 1.0f, 1.0f);
 			g.MoveParticles (particles, timestep);
 			//Debug.Log ("Step took " + (Time.realtimeSinceStartup - startTime));
 		//	yield return new WaitForFixedUpdate();
