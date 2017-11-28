@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa5b7a43cbd0e44a8a7bfcaea572a813, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: 0.05
+  cellSize: 0.1
   volume: {x: 1, y: 1, z: 1}
   center: {x: 0, y: 0, z: 0}
   blue: {fileID: 2100000, guid: a20013187ec42458d9479da72dc10f7d, type: 2}
