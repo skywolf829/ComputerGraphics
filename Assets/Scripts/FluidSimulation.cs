@@ -15,6 +15,8 @@ public class FluidSimulation : MonoBehaviour {
 
         float cellSize;
         Grid g;
+        public Cell up, down, left, right, forward, behind;
+
         public Cell(Grid g, float size, Vector3Int index){
             this.g = g;
 			pressure = 0;
@@ -32,54 +34,68 @@ public class FluidSimulation : MonoBehaviour {
         }
         public List<Cell> neighbors(){
             List<Cell> n = new List<Cell>();
-            if(above() != null){
-                n.Add(above());
+            if(up != null){
+                n.Add(up);
             }
-            if(below() != null){
-                n.Add(below());
+            if(down != null){
+                n.Add(down);
             }
-            if (left() != null){
-                n.Add(left());
+            if (left != null){
+                n.Add(left);
             }
-            if(right() != null){
-                n.Add(right());
+            if(right != null){
+                n.Add(right);
             }
-            if(behind() != null){
-                n.Add(behind());
+            if(behind != null){
+                n.Add(behind);
             }
-            if (forward() != null){
-                n.Add(forward());
+            if (forward != null){
+                n.Add(forward);
             }
             return n;
         }
-        public Cell above(){
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(0, cellSize, 0));
-        }
-        public Cell below()
-        {
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(0, -cellSize, 0));
-        }
-        public Cell left()
-        {
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(-cellSize, 0, 0));
-        }
-        public Cell right()
-        {
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(cellSize, 0, 0));
-        }
-        public Cell forward()
-        {
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(0, 0, cellSize));
-        }
-        public Cell behind()
-        {
-            Vector3 pos = new Vector3(index.x, index.y, index.z);
-            return g.GetCellAt(pos * cellSize + new Vector3(0, 0, -cellSize));
+
+        public Vector3 VelocityGradient(){
+            Vector3 result = Vector3.zero;
+            Vector3 num = Vector3.zero;
+            result = this.velocity;
+            //Debug.Log("Cell: " + c.index + " velocity is " + result);
+            if (this.left != null)
+            {
+                result.x += this.velocity.x - this.left.velocity.x;
+                num.x += 1;
+            }
+            if (this.right != null)
+            {
+                result.x += -this.velocity.x + this.right.velocity.x;
+                num.x += 1;
+            }
+
+            if (this.down != null)
+            {
+                result.y += this.velocity.y - this.down.velocity.y;
+                num.y += 1;
+            }
+            if (this.up != null)
+            {
+                result.y += -this.velocity.y + this.up.velocity.y;
+                num.y += 1;
+            }
+            if (this.behind != null)
+            {
+                result.z += this.velocity.z - this.behind.velocity.z;
+                num.z += 1;
+            }
+            if (this.forward != null)
+            {
+                result.z += -this.velocity.z + this.forward.velocity.z;
+                num.z += 1;
+            }
+
+            if (num.x > 0.01f) result.x /= num.x;
+            if (num.y > 0.01f) result.y /= num.y;
+            if (num.z > 0.01f) result.z /= num.z;
+            return result;
         }
 
 	}
@@ -103,246 +119,249 @@ public class FluidSimulation : MonoBehaviour {
 			center = origin;
 		}
 	
-		Vector3 PressureGradientAt(Vector3 pos){
+		Vector3 PressureGradientAt(Cell c){
+            if (c == null) return Vector3.zero;
+
 			Vector3 result = Vector3.zero;
             Vector3 num = Vector3.zero;
-			Cell c = GetCellAt (pos);
-			if (c != null) {
-                if (c.left() != null)
-                {
-                    result.x += c.pressure - c.left().pressure;
-                    num.x += 1;
-                }
-                if (c.below() != null)
-                {
-                    result.y += c.pressure - c.below().pressure;
-                    num.y += 1;
-                }
 
-                if (c.behind() != null)
-                {
-                    result.z += c.pressure - c.behind().pressure;
-                    num.z += 1;
-                }
-                if (c.right() != null)
-                {
-                    result.x += -c.pressure + c.right().pressure;
-                    num.x += 1;
-                }
-                if (c.above() != null)
-                {
-                    result.y += -c.pressure + c.above().pressure;
-                    num.y += 1;
-                }
+            if (c.left != null)
+            {
+                result.x += c.pressure - c.left.pressure;
+                num.x += 1;
+            }
+            if (c.down != null)
+            {
+                result.y += c.pressure - c.down.pressure;
+                num.y += 1;
+            }
 
-                if (c.forward() != null)
-                {
-                    result.z += -c.pressure + c.forward().pressure;
-                    num.z += 1;
-                }
-			}
+            if (c.behind != null)
+            {
+                result.z += c.pressure - c.behind.pressure;
+                num.z += 1;
+            }
+            if (c.right != null)
+            {
+                result.x += -c.pressure + c.right.pressure;
+                num.x += 1;
+            }
+            if (c.up != null)
+            {
+                result.y += -c.pressure + c.up.pressure;
+                num.y += 1;
+            }
+
+            if (c.forward != null)
+            {
+                result.z += -c.pressure + c.forward.pressure;
+                num.z += 1;
+            }
+			
             if (num.x > 0.01f) result.x /= num.x;
             if (num.y > 0.01f) result.y /= num.y;
             if (num.z > 0.01f) result.z /= num.z;
 			return result;
 		}
-        Vector3 VelocityGradientAt(Vector3 pos)
+        Vector3 VelocityGradientAt(Cell c)
         {
+            if (c == null) return Vector3.zero;
+
             Vector3 result = Vector3.zero;
             Vector3 num = Vector3.zero;
-            Cell c = GetCellAt(pos);
-            if (c != null)
-            {
-                result = c.velocity;
-                //Debug.Log("Cell: " + c.index + " velocity is " + result);
-                if (c.left() != null)
-                {
-                    result.x += c.velocity.x - c.left().velocity.x;
-                    num.x += 1;
-                }
-                if(c.right() != null){
-                    result.x += -c.velocity.x + c.right().velocity.x;
-                    num.x += 1;
-                }
 
-                if (c.below() != null)
-                {
-                    result.y += c.velocity.y - c.below().velocity.y;
-                    num.y += 1;
-                }
-                if (c.above() != null)
-                {
-                    result.y += -c.velocity.y + c.above().velocity.y;
-                    num.y += 1;
-                }
-                if (c.behind() != null)
-                {
-                    result.z += c.velocity.z - c.behind().velocity.z;
-                    num.z += 1;
-                }
-                if (c.forward() != null)
-                {
-                    result.z += -c.velocity.z + c.forward().velocity.z;
-                    num.z += 1;
-                }
+            result = c.velocity;
+            //Debug.Log("Cell: " + c.index + " velocity is " + result);
+            if (c.left != null)
+            {
+                result.x += c.velocity.x - c.left.velocity.x;
+                num.x += 1;
             }
+            if(c.right != null){
+                result.x += -c.velocity.x + c.right.velocity.x;
+                num.x += 1;
+            }
+
+            if (c.down != null)
+            {
+                result.y += c.velocity.y - c.down.velocity.y;
+                num.y += 1;
+            }
+            if (c.up != null)
+            {
+                result.y += -c.velocity.y + c.up.velocity.y;
+                num.y += 1;
+            }
+            if (c.behind != null)
+            {
+                result.z += c.velocity.z - c.behind.velocity.z;
+                num.z += 1;
+            }
+            if (c.forward != null)
+            {
+                result.z += -c.velocity.z + c.forward.velocity.z;
+                num.z += 1;
+            }
+        
             if (num.x > 0.01f) result.x /= num.x;
             if (num.y > 0.01f) result.y /= num.y;
             if (num.z > 0.01f) result.z /= num.z;
             return result;
 		}
-        Vector3 ModifiedVelocityGadientAt(Vector3 pos){
+        Vector3 ModifiedVelocityGadientAt(Cell c){
+            if (c == null) return Vector3.zero;
+
             Vector3 result = Vector3.zero;
             Vector3 num = Vector3.zero;
-            Cell c = GetCellAt(pos);
-            if (c != null)
-            {
-                Vector3 cVel = c.velocity;
 
-                if ((c.left() != null && c.left().type == "solid") ||
-                    (c.right() != null && c.right().type == "solid")){
-                    cVel.x = 0;
-                }
-                if ((c.below() != null && c.below().type == "solid") ||
-                    (c.above() != null && c.above().type == "solid")){
-                    cVel.y = 0;
-                }
-                if((c.behind() != null && c.behind().type == "solid") ||
-                   (c.forward() != null && c.forward().type == "solid")){
-                    cVel.z = 0;
-                }
+            Vector3 cVel = c.velocity;
 
-                if (c.right() != null && c.right().type != "solid")
-                {
-                    result.x += -cVel.x + c.right().velocity.x;
-                    num.x += 1;
-                }
-                if(c.left() != null && c.left().type != "solid"){
-                    result.x += cVel.x - c.left().velocity.x;
-                    num.x += 1;
-                }
-                if (c.above() != null && c.above().type != "solid")
-                {
-                    result.y += -cVel.y + c.above().velocity.y;
-                    num.y += 1;
-                }
-                if(c.below() != null && c.below().type != "solid"){
-                    result.y += cVel.y + c.below().velocity.y;
-                    num.y += 1;
-                }
-
-                if (c.forward() != null && c.forward().type != "solid")
-                {
-                    result.z += -cVel.z + c.forward().velocity.z;
-                    num.z += 1;
-                }
-                if(c.behind() != null && c.behind().type != "solid"){
-                    result.z += cVel.z - c.behind().velocity.z;
-                    num.z += 1;
-                }
+            if ((c.left != null && c.left.type == "solid") ||
+                (c.right != null && c.right.type == "solid")){
+                cVel.x = 0;
             }
+            if ((c.down != null && c.down.type == "solid") ||
+                (c.up != null && c.up.type == "solid")){
+                cVel.y = 0;
+            }
+            if((c.behind != null && c.behind.type == "solid") ||
+               (c.forward != null && c.forward.type == "solid")){
+                cVel.z = 0;
+            }
+
+            if (c.right != null && c.right.type != "solid")
+            {
+                result.x += -cVel.x + c.right.velocity.x;
+                num.x += 1;
+            }
+            if(c.left != null && c.left.type != "solid"){
+                result.x += cVel.x - c.left.velocity.x;
+                num.x += 1;
+            }
+            if (c.up != null && c.up.type != "solid")
+            {
+                result.y += -cVel.y + c.up.velocity.y;
+                num.y += 1;
+            }
+            if(c.down != null && c.down.type != "solid"){
+                result.y += cVel.y + c.down.velocity.y;
+                num.y += 1;
+            }
+
+            if (c.forward != null && c.forward.type != "solid")
+            {
+                result.z += -cVel.z + c.forward.velocity.z;
+                num.z += 1;
+            }
+            if(c.behind != null && c.behind.type != "solid"){
+                result.z += cVel.z - c.behind.velocity.z;
+                num.z += 1;
+            }
+
             if (num.x > 0.01f) result.x /= num.x;
             if (num.y > 0.01f) result.y /= num.y;
             if (num.z > 0.01f) result.z /= num.z;
             return result;
         }
-        float ModifiedDivergenceAt(Vector3 pos){
-            Vector3 result = ModifiedVelocityGadientAt(pos);
+        float ModifiedDivergenceAt(Cell c){
+            if (c == null) return 0;
+
+            Vector3 result = ModifiedVelocityGadientAt(c);
             return result.x + result.y + result.z;
         }
-		float DivergenceAt(Vector3 pos){
-			Vector3 result = VelocityGradientAt (pos);
+        float DivergenceAt(Cell c){
+            if (c == null) return 0;
+
+			Vector3 result = VelocityGradientAt (c);
 			return result.x + result.y + result.z;
 		}
 
-		float PressureLaplacianAt(Vector3 pos){
+		float PressureLaplacianAt(Cell c){
+            if (c == null) return 0;
 			float result = 0;
-			Cell c = GetCellAt (pos);
-			if (c != null) {
-				int num = 0;
+			int num = 0;
 
-                if (c.left() != null) {
-                    result += c.left().pressure;
-					num++;
-				}
-                if (c.right() != null) {
-                    result += c.right().pressure;
-					num++;
-				}
-                if (c.below() != null) {
-                    result += c.below().pressure;
-					num++;
-				}
-                if (c.above() != null) {
-                    result += c.above().pressure;
-					num++;
-				}
-                if (c.behind() != null) {
-                    result += c.behind().pressure;
-					num++;
-				}
-                if (c.forward() != null) {
-                    result += c.forward().pressure;
-					num++;
-				}
-				result -= num * c.pressure;
+            if (c.left != null) {
+                result += c.left.pressure;
+				num++;
 			}
+            if (c.right != null) {
+                result += c.right.pressure;
+				num++;
+			}
+            if (c.down != null) {
+                result += c.down.pressure;
+				num++;
+			}
+            if (c.up != null) {
+                result += c.up.pressure;
+				num++;
+			}
+            if (c.behind != null) {
+                result += c.behind.pressure;
+				num++;
+			}
+            if (c.forward != null) {
+                result += c.forward.pressure;
+				num++;
+			}
+			result -= num * c.pressure;
+		
 			return result;
 		}
 
-		Vector3 VelocityLaplacianAt(Vector3 pos){
+		Vector3 VelocityLaplacianAt(Cell c){
+            if (c == null) return Vector3.zero;
 			Vector3 result = Vector3.zero;
-			Cell c = GetCellAt (pos);
-			if (c != null) {
-				Vector3 gradient = VelocityGradientAt (pos);
+			Vector3 gradient = VelocityGradientAt (c);
 
-				int num = 0;
+			int num = 0;
 
-				Vector3 left = VelocityGradientAt (pos - new Vector3 (cellSize, 0, 0));
-				Vector3 right = VelocityGradientAt (pos + new Vector3 (cellSize, 0, 0));
-				Vector3 below = VelocityGradientAt (pos - new Vector3 (0, cellSize, 0));
-				Vector3 above = VelocityGradientAt (pos + new Vector3 (0, cellSize, 0));
-				Vector3 behind = VelocityGradientAt (pos - new Vector3 (0, 0, cellSize));
-				Vector3 forward = VelocityGradientAt (pos + new Vector3 (0, 0, cellSize));
+			Vector3 left = VelocityGradientAt (c.left);
+			Vector3 right = VelocityGradientAt (c.right);
+            Vector3 below = VelocityGradientAt (c.down);
+            Vector3 above = VelocityGradientAt (c.up);
+			Vector3 behind = VelocityGradientAt (c.behind);
+			Vector3 forward = VelocityGradientAt (c.forward);
 
-                if (c.left() != null) {
-					result.x += left.x;
-					result.y += left.y;
-					result.z += left.z;
-					num++;
-				}
-                if (c.right() != null) {
-					result.x += right.x;
-					result.y += right.y;
-					result.z += right.z;
-					num++;
-				}
-                if (c.below() != null) {
-					result.x += below.x;
-					result.y += below.y;
-					result.z += below.z;
-					num++;
-				}
-                if (c.above() != null) {
-					result.x += above.x;
-					result.y += above.y;
-					result.z += above.z;
-					num++;
-				}
-                if (c.behind() != null) {
-					result.x += behind.x;
-					result.y += behind.y;
-					result.z += behind.z;
-					num++;
-				}
-                if (c.forward() != null) {
-					result.x += forward.x;
-					result.y += forward.y;
-					result.z += forward.z;
-					num++;
-				}
-				result -= num * gradient;
+            if (c.left != null) {
+				result.x += left.x;
+				result.y += left.y;
+				result.z += left.z;
+				num++;
 			}
+            if (c.right != null) {
+				result.x += right.x;
+				result.y += right.y;
+				result.z += right.z;
+				num++;
+			}
+            if (c.down != null) {
+				result.x += below.x;
+				result.y += below.y;
+				result.z += below.z;
+				num++;
+			}
+            if (c.up != null) {
+				result.x += above.x;
+				result.y += above.y;
+				result.z += above.z;
+				num++;
+			}
+            if (c.behind != null) {
+				result.x += behind.x;
+				result.y += behind.y;
+				result.z += behind.z;
+				num++;
+			}
+            if (c.forward != null) {
+				result.x += forward.x;
+				result.y += forward.y;
+				result.z += forward.z;
+				num++;
+			}
+			result -= num * gradient;
+		
 			return result;
 		}
 
@@ -367,32 +386,32 @@ public class FluidSimulation : MonoBehaviour {
                 result = c.velocity;
                 Vector3 cCellGlobalSpot = ToVector3(c.index) * cellSize;
 
-                if (pos.x > cCellGlobalSpot.x && c.right() != null)
+                if (pos.x > cCellGlobalSpot.x && c.right != null)
                 {
-                    result.x = Mathf.Lerp(c.velocity.x, c.right().velocity.x,
+                    result.x = Mathf.Lerp(c.velocity.x, c.right.velocity.x,
                                           (pos.x - cCellGlobalSpot.x) / cellSize);   
                 }
-                else if (pos.x < cCellGlobalSpot.x && c.left() != null){
-                    result.x = Mathf.Lerp(c.velocity.x, c.left().velocity.x,
+                else if (pos.x < cCellGlobalSpot.x && c.left != null){
+                    result.x = Mathf.Lerp(c.velocity.x, c.left.velocity.x,
                                           (-pos.x + cCellGlobalSpot.x) / cellSize);  
                 }
-                if (pos.z > cCellGlobalSpot.z && c.forward() != null){
-                    result.z = Mathf.Lerp(c.velocity.z, c.forward().velocity.z, 
+                if (pos.z > cCellGlobalSpot.z && c.forward != null){
+                    result.z = Mathf.Lerp(c.velocity.z, c.forward.velocity.z, 
                                           (pos.z - cCellGlobalSpot.z) / cellSize);
                 }
-                else if (pos.z < cCellGlobalSpot.z && c.behind() != null)
+                else if (pos.z < cCellGlobalSpot.z && c.behind != null)
                 {
-                    result.z = Mathf.Lerp(c.velocity.z, c.behind().velocity.z,
+                    result.z = Mathf.Lerp(c.velocity.z, c.behind.velocity.z,
                                           (-pos.z + cCellGlobalSpot.z) / cellSize);
                 }
-                if (pos.y > cCellGlobalSpot.y && c.above() != null)
+                if (pos.y > cCellGlobalSpot.y && c.up != null)
                 {
-                    result.y = Mathf.Lerp(c.velocity.y, c.above().velocity.y, 
+                    result.y = Mathf.Lerp(c.velocity.y, c.up.velocity.y, 
                                           (pos.y - cCellGlobalSpot.y) / cellSize);
                 }
-                else if (pos.y < cCellGlobalSpot.y && c.below() != null)
+                else if (pos.y < cCellGlobalSpot.y && c.down != null)
                 {
-                    result.y = Mathf.Lerp(c.velocity.y, c.below().velocity.y,
+                    result.y = Mathf.Lerp(c.velocity.y, c.down.velocity.y,
                                           (-pos.y + cCellGlobalSpot.y) / cellSize);
                 }
             }
@@ -427,9 +446,7 @@ public class FluidSimulation : MonoBehaviour {
 		}
 		Vector3Int GetIndexFor(Vector3 pos){
 			pos += Vector3.one * cellSize / 2.0f;
-			return new Vector3Int (Mathf.FloorToInt(pos.x / cellSize),
-				Mathf.FloorToInt(pos.y / cellSize), 
-				Mathf.FloorToInt(pos.z / cellSize));
+            return Vector3Int.FloorToInt((pos / cellSize));
 		}
 		int hash(Vector3Int xyz){
 			return 541 * xyz.x + 79 * xyz.y + 31 * xyz.z;
@@ -576,6 +593,16 @@ public class FluidSimulation : MonoBehaviour {
             {
                 cells.Remove(k);
             }
+
+            foreach(DictionaryEntry entry in cells){
+                Cell c = (Cell)entry.Value;
+                c.up = GetCellAt(ToVector3(c.index) * cellSize + new Vector3(0, cellSize, 0));
+                c.down = GetCellAt(ToVector3(c.index) * cellSize - new Vector3(0, cellSize, 0));
+                c.left = GetCellAt(ToVector3(c.index) * cellSize - new Vector3(cellSize, 0, 0));
+                c.right = GetCellAt(ToVector3(c.index) * cellSize + new Vector3(cellSize, 0, 0));
+                c.forward = GetCellAt(ToVector3(c.index) * cellSize + new Vector3(0, 0, cellSize));
+                c.behind = GetCellAt(ToVector3(c.index) * cellSize - new Vector3(0, 0, cellSize));
+            }
         }
 
 		public void AdvanceVelocityField(float timestep, float gravity, float viscosity,
@@ -631,7 +658,7 @@ public class FluidSimulation : MonoBehaviour {
 			foreach (DictionaryEntry entry in cells) {
 				Cell c = ((Cell)entry.Value);
 				if (c.type == "fluid" ||
-                    (c.above() != null && c.above().type == "fluid")) {
+                    (c.up != null && c.up.type == "fluid")) {
                     c.velocity += new Vector3(0, timestep * gravity, 0);
 				}
 			}
@@ -641,7 +668,7 @@ public class FluidSimulation : MonoBehaviour {
 
 			foreach (DictionaryEntry entry in cells) {
 				Cell c = ((Cell)entry.Value);
-                Vector3 l = VelocityLaplacianAt (ToVector3(c.index) * cellSize);
+                Vector3 l = VelocityLaplacianAt (c);
 				c.tempVelocity = c.velocity + timestep * l * viscosity;
 			}
 			ApplyTempVelocities ();
@@ -662,63 +689,63 @@ public class FluidSimulation : MonoBehaviour {
 					belowRow = 0, aboveRow = 0, behindRow = 0, 
 					forwardRow = 0;
 					bool added = false;
-                    if (c.left() != null && c.left().type != "solid") {
-                        added = cellToRow.TryGetValue(c.left(), out leftRow);
-                        if (!added && c.left().type == "fluid") {
+                    if (c.left != null && c.left.type != "solid") {
+                        added = cellToRow.TryGetValue(c.left, out leftRow);
+                        if (!added && c.left.type == "fluid") {
 							leftRow = cellToRow.Count;
-                            cellToRow.Add (c.left(), leftRow);
+                            cellToRow.Add (c.left, leftRow);
 						}
-                        if (c.left().type == "air")
+                        if (c.left.type == "air")
 							numAirCells++;
 						num++;
 					}
-                    if (c.right() != null && c.right().type != "solid") {
-                        added = cellToRow.TryGetValue(c.right(), out rightRow);
-                        if (!added && c.right().type == "fluid") {
+                    if (c.right != null && c.right.type != "solid") {
+                        added = cellToRow.TryGetValue(c.right, out rightRow);
+                        if (!added && c.right.type == "fluid") {
 							rightRow = cellToRow.Count;
-                            cellToRow.Add (c.right(), rightRow);
+                            cellToRow.Add (c.right, rightRow);
 						}
-                        if (c.right().type == "air")
+                        if (c.right.type == "air")
 							numAirCells++;
 						num++;
 					}
-                    if (c.below() != null && c.below().type != "solid") {
-                        added = cellToRow.TryGetValue(c.below(), out belowRow);
-                        if (!added && c.below().type == "fluid") {
+                    if (c.down != null && c.down.type != "solid") {
+                        added = cellToRow.TryGetValue(c.down, out belowRow);
+                        if (!added && c.down.type == "fluid") {
 							belowRow = cellToRow.Count;
-                            cellToRow.Add (c.below(), belowRow);
+                            cellToRow.Add (c.down, belowRow);
 						}
-                        if (c.below().type == "air")
+                        if (c.down.type == "air")
 							numAirCells++;
 						num++;
 					}
-                    if (c.above() != null && c.above().type != "solid") {
-                        added = cellToRow.TryGetValue(c.above(), out aboveRow);
-                        if (!added && c.above().type == "fluid") {
+                    if (c.up != null && c.up.type != "solid") {
+                        added = cellToRow.TryGetValue(c.up, out aboveRow);
+                        if (!added && c.up.type == "fluid") {
 							aboveRow = cellToRow.Count;
-                            cellToRow.Add (c.above(), aboveRow);
+                            cellToRow.Add (c.up, aboveRow);
 						}
-                        if (c.above().type == "air")
+                        if (c.up.type == "air")
 							numAirCells++;
 						num++;
 					}
-                    if (c.behind() != null && c.behind().type != "solid") {
-                        added = cellToRow.TryGetValue(c.behind(), out behindRow);
-                        if (!added && c.behind().type == "fluid") {
+                    if (c.behind != null && c.behind.type != "solid") {
+                        added = cellToRow.TryGetValue(c.behind, out behindRow);
+                        if (!added && c.behind.type == "fluid") {
 							behindRow = cellToRow.Count;
-                            cellToRow.Add (c.behind(), behindRow);
+                            cellToRow.Add (c.behind, behindRow);
 						}
-                        if (c.behind().type == "air")
+                        if (c.behind.type == "air")
 							numAirCells++;
 						num++;
 					}
-                    if (c.forward() != null && c.forward().type != "solid") {
-                        added = cellToRow.TryGetValue(c.forward(), out forwardRow);
-                        if (!added && c.forward().type == "fluid") {
+                    if (c.forward != null && c.forward.type != "solid") {
+                        added = cellToRow.TryGetValue(c.forward, out forwardRow);
+                        if (!added && c.forward.type == "fluid") {
 							forwardRow = cellToRow.Count;
-                            cellToRow.Add (c.forward(), forwardRow);
+                            cellToRow.Add (c.forward, forwardRow);
 						}
-                        if (c.forward().type == "air")
+                        if (c.forward.type == "air")
 							numAirCells++;
 						num++;
 					}
@@ -730,27 +757,27 @@ public class FluidSimulation : MonoBehaviour {
 						cellToRow.Add (c, row);
 					}
 					alglib.sparseset(a, row, row, -num);
-                    if (c.left() != null && c.left().type == "fluid") {
+                    if (c.left != null && c.left.type == "fluid") {
 						alglib.sparseset(a, row, leftRow, 1);
 					}
-                    if (c.right() != null && c.right().type == "fluid") {
+                    if (c.right != null && c.right.type == "fluid") {
 						alglib.sparseset(a, row, rightRow, 1);
 					}
-                    if (c.below() != null && c.below().type == "fluid") {
+                    if (c.down != null && c.down.type == "fluid") {
 						alglib.sparseset(a, row, belowRow, 1);
 					}
-                    if (c.above() != null && c.above().type == "fluid") {
+                    if (c.up != null && c.up.type == "fluid") {
 						alglib.sparseset(a, row, aboveRow, 1);
 					}
-                    if (c.behind() != null && c.behind().type == "fluid") {
+                    if (c.behind != null && c.behind.type == "fluid") {
 						alglib.sparseset(a, row, behindRow, 1);
 					}
-                    if (c.forward() != null && c.forward().type == "fluid") {
+                    if (c.forward != null && c.forward.type == "fluid") {
 						alglib.sparseset(a, row, forwardRow, 1);
 					}
 
 					b [row] = ((density * cellSize) / timestep) *
-                        ModifiedDivergenceAt (ToVector3 (c.index) * cellSize) -
+                        ModifiedDivergenceAt (c) -
 					    numAirCells * atmPressure;
 				}
 			}
@@ -781,7 +808,7 @@ public class FluidSimulation : MonoBehaviour {
                 if (c.type == "fluid"
                    || (c.type == "air" && c.hasFluidNeighbor())){
                     c.velocity -= (timestep / (density * cellSize)) *
-                        PressureGradientAt(ToVector3(c.index) * cellSize);
+                        PressureGradientAt(c);
                 }
                
 			}
@@ -813,32 +840,32 @@ public class FluidSimulation : MonoBehaviour {
                             Vector3 numToDivide = Vector3.zero;
                             foreach (Cell n in neighbors)
                             {
-                                if (c.below() == null || c.below().type != "fluid")
+                                if (c.down == null || c.down.type != "fluid")
                                 {
                                     newVelocity.y += n.velocity.y;
                                     numToDivide.y += 1;
                                 }
-                                if (c.left() == null || c.left().type != "fluid")
+                                if (c.left == null || c.left.type != "fluid")
                                 {
                                     newVelocity.x += n.velocity.x;
                                     numToDivide.x += 1;
                                 }
-                                if (c.behind() == null || c.behind().type != "fluid")
+                                if (c.behind == null || c.behind.type != "fluid")
                                 {
                                     newVelocity.z += n.velocity.z;
                                     numToDivide.z += 1;
                                 }
-                                if(c.above() == null || c.above().type != "fluid")
+                                if(c.up == null || c.up.type != "fluid")
                                 {
                                     newVelocity.y += n.velocity.y;
                                     numToDivide.y += 1;
                                 }
-                                if (c.right() == null || c.right().type != "fluid")
+                                if (c.right == null || c.right.type != "fluid")
                                 {
                                     newVelocity.x += n.velocity.x;
                                     numToDivide.x += 1;
                                 }
-                                if (c.forward() == null || c.forward().type != "fluid")
+                                if (c.forward == null || c.forward.type != "fluid")
                                 {
                                     newVelocity.z += n.velocity.z;
                                     numToDivide.z += 1;
@@ -872,36 +899,36 @@ public class FluidSimulation : MonoBehaviour {
                     c.velocity = Vector3.zero;
 
 
-                    if (c.left() != null
-                        && (c.left().type == "air" || c.left().type == "fluid")
-                        && c.left().velocity.x > 0) {
-                        c.left().velocity.x = -c.left().velocity.x * 0.5f;
+                    if (c.left != null
+                        && (c.left.type == "air" || c.left.type == "fluid")
+                        && c.left.velocity.x > 0) {
+                        c.left.velocity.x = -c.left.velocity.x * 0.5f;
 					}
-                    if (c.below() != null
-                        && (c.below().type == "air" || c.below().type == "fluid")
-                        && c.below().velocity.y > 0) {
-                        c.below().velocity.y = -c.below().velocity.y * 0.5f;
+                    if (c.down != null
+                        && (c.down.type == "air" || c.down.type == "fluid")
+                        && c.down.velocity.y > 0) {
+                        c.down.velocity.y = -c.down.velocity.y * 0.5f;
                     }
-                    if (c.behind() != null
-                        && (c.behind().type == "air" || c.behind().type == "fluid")
-                        && c.behind().velocity.z > 0) {
-                        c.behind().velocity.z = -c.behind().velocity.z * 0.5f;
+                    if (c.behind != null
+                        && (c.behind.type == "air" || c.behind.type == "fluid")
+                        && c.behind.velocity.z > 0) {
+                        c.behind.velocity.z = -c.behind.velocity.z * 0.5f;
                     }
 
-                    if (c.right() != null
-                        && (c.right().type == "air" || c.right().type == "fluid")
-                        && c.right().velocity.x < 0) {
-                        c.right().velocity.x = -c.right().velocity.x * 0.5f;
+                    if (c.right != null
+                        && (c.right.type == "air" || c.right.type == "fluid")
+                        && c.right.velocity.x < 0) {
+                        c.right.velocity.x = -c.right.velocity.x * 0.5f;
 					}
-                    if (c.above() != null
-                        && (c.above().type == "air" || c.above().type == "fluid")
-                        && c.above().velocity.y < 0) {
-                        c.above().velocity.y = -c.above().velocity.y * 0.5f;
+                    if (c.up != null
+                        && (c.up.type == "air" || c.up.type == "fluid")
+                        && c.up.velocity.y < 0) {
+                        c.up.velocity.y = -c.up.velocity.y * 0.5f;
 					}
-                    if (c.forward() != null
-                        && (c.forward().type == "air" || c.forward().type == "fluid")
-                        && c.forward().velocity.z < 0) {
-                        c.forward().velocity.z = -c.forward().velocity.z * 0.5f;
+                    if (c.forward != null
+                        && (c.forward.type == "air" || c.forward.type == "fluid")
+                        && c.forward.velocity.z < 0) {
+                        c.forward.velocity.z = -c.forward.velocity.z * 0.5f;
 					}
 				}
 			}
@@ -995,7 +1022,7 @@ public class FluidSimulation : MonoBehaviour {
 			float timestep = g.GetTimeStep ();
 			//timestep = Time.fixedDeltaTime;
 			g.UpdateGrid (particles);
-			g.AdvanceVelocityField (timestep, -5f, 0.01f, 1.0f, 1.0f);
+			g.AdvanceVelocityField (timestep, -5f, 0.00f, 1.0f, 1.0f);
 			g.MoveParticles (particles, timestep);
 			//Debug.Log ("Step took " + (Time.realtimeSinceStartup - startTime));
 		//	yield return new WaitForFixedUpdate();
