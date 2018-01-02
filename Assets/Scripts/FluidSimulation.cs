@@ -11,6 +11,7 @@ public class FluidSimulation : MonoBehaviour {
 		public Vector3Int index;
 
 		public int layer;
+        public int numParticles;
 		public string type;
 
         float cellSize;
@@ -21,6 +22,7 @@ public class FluidSimulation : MonoBehaviour {
             this.g = g;
 			pressure = 0;
             cellSize = size;
+            numParticles = 0;
 			velocity = Vector3.zero;
 			this.index = index;
 		}
@@ -104,7 +106,7 @@ public class FluidSimulation : MonoBehaviour {
         
 		const float CFL_CONSTANT = 2;
 		const float MIN_TIMESTEP = 1 / 1000f;
-        const float MAX_TIMESTEP = 1 / 60f;
+        const float MAX_TIMESTEP = 1 / 120f;
 
 		private float cellSize;
 		private Vector3 volume;
@@ -244,7 +246,7 @@ public class FluidSimulation : MonoBehaviour {
                 num.y += 1;
             }
             if(c.down != null && c.down.type != "solid"){
-                result.y += cVel.y + c.down.velocity.y;
+                result.y += cVel.y - c.down.velocity.y;
                 num.y += 1;
             }
 
@@ -500,6 +502,7 @@ public class FluidSimulation : MonoBehaviour {
             {
                 Cell c = (Cell)(entry.Value);
                 c.layer = -1;
+                c.numParticles = 0;
             }
 
             // Update cells with fluid
@@ -514,6 +517,7 @@ public class FluidSimulation : MonoBehaviour {
                         c = new Cell(this, cellSize, xyz);
                         c.layer = 0;
                         c.type = "fluid";
+                        c.numParticles++;
                         cells.Add(hash(xyz), c);
                     }
                 }
@@ -522,6 +526,7 @@ public class FluidSimulation : MonoBehaviour {
                     if (c.type != "solid")
                     {
                         c.type = "fluid";
+                        c.numParticles++;
                         c.layer = 0;
                     }
                 }
@@ -776,7 +781,7 @@ public class FluidSimulation : MonoBehaviour {
 						alglib.sparseset(a, row, forwardRow, 1);
 					}
 
-					b [row] = ((density * cellSize) / timestep) *
+                    b [row] = ((density * c.numParticles * cellSize) / timestep) *
                         ModifiedDivergenceAt (c) -
 					    numAirCells * atmPressure;
 				}
@@ -1022,7 +1027,7 @@ public class FluidSimulation : MonoBehaviour {
 			float timestep = g.GetTimeStep ();
 			//timestep = Time.fixedDeltaTime;
 			g.UpdateGrid (particles);
-			g.AdvanceVelocityField (timestep, -5f, 0.00f, 1.0f, 1.0f);
+			g.AdvanceVelocityField (timestep, -5f, 0.01f, 1.0f, 1.0f);
 			g.MoveParticles (particles, timestep);
 			//Debug.Log ("Step took " + (Time.realtimeSinceStartup - startTime));
 		//	yield return new WaitForFixedUpdate();
